@@ -7,17 +7,123 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" href="data:,">
+    <!-- Inline script to try to play audio as early as possible using Web Audio API -->
+    <script>
+        // Create a global audio context as soon as possible
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        var audioContext;
+        var audioBuffer;
+        var audioSource;
+        var isPlaying = false;
+        
+        try {
+            audioContext = new AudioContext();
+        } catch(e) {
+            console.log('Web Audio API is not supported in this browser');
+        }
+        
+        // Load and play audio using Web Audio API
+        function loadAndPlayAudio() {
+            if (!audioContext) return;
+            
+            // Create a buffer source if not already created
+            if (!audioBuffer) {
+                var request = new XMLHttpRequest();
+                request.open('GET', 'videoplayback.m4a', true);
+                request.responseType = 'arraybuffer';
+                
+                request.onload = function() {
+                    audioContext.decodeAudioData(request.response, function(buffer) {
+                        audioBuffer = buffer;
+                        playSound();
+                    }, function(e) {
+                        console.log('Error decoding audio data:', e);
+                    });
+                };
+                
+                request.send();
+            } else {
+                playSound();
+            }
+        }
+        
+        function playSound() {
+            if (!audioContext || !audioBuffer) return;
+            
+            // Stop any currently playing sound
+            if (audioSource) {
+                try {
+                    audioSource.stop();
+                } catch(e) {}
+            }
+            
+            // Create a new source
+            audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+            audioSource.loop = true;
+            
+            // Connect to output
+            audioSource.connect(audioContext.destination);
+            
+            // Play the sound
+            audioSource.start(0);
+            isPlaying = true;
+            
+            // Update button state
+            var musicButton = document.getElementById('music-control');
+            if (musicButton) {
+                musicButton.classList.add('playing');
+            }
+        }
+        
+        function togglePlay() {
+            if (isPlaying) {
+                if (audioSource) {
+                    try {
+                        audioSource.stop();
+                        isPlaying = false;
+                        var musicButton = document.getElementById('music-control');
+                        if (musicButton) {
+                            musicButton.classList.remove('playing');
+                        }
+                    } catch(e) {}
+                }
+            } else {
+                playSound();
+            }
+        }
+        
+        // Try to start audio on page load
+        window.onload = function() {
+            // Try to resume audio context (needed for Chrome)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            setTimeout(loadAndPlayAudio, 100);
+            
+            // Also try standard audio element as fallback
+            var audio = document.getElementById('background-music');
+            if (audio) {
+                audio.muted = false;
+                audio.play().catch(function(e) {
+                    console.log("Standard audio play attempt failed:", e);
+                });
+            }
+        };
+    </script>
 </head>
 <body>
-    <!-- Background music - hidden YouTube player -->
-    <div class="youtube-player">
-        <iframe 
-            src="https://www.youtube.com/embed/06-XXOTP3Gc?autoplay=1&mute=0&controls=0&loop=1&playlist=06-XXOTP3Gc" 
-            allow="autoplay; encrypted-media" 
-            allowfullscreen
-            frameborder="0">
-        </iframe>
-    </div>
+    <!-- Fallback audio element -->
+    <audio id="background-music" autoplay loop muted>
+        <source src="videoplayback.m4a" type="audio/m4a">
+        Your browser does not support the audio element.
+    </audio>
+    
+    <!-- Music control button -->
+    <button id="music-control" class="music-button playing" onclick="togglePlay()">
+        <span class="music-icon">♫</span>
+    </button>
     
     <div class="container">
         <div class="wedding-card">
@@ -53,6 +159,30 @@
     <div class="hearts-container">
         <!-- Hearts will be added by JavaScript -->
     </div>
+    
+    <script>
+        // Try to play audio when user interacts with the page
+        document.addEventListener('click', function initAudio() {
+            // Resume audio context if suspended
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(function() {
+                    loadAndPlayAudio();
+                });
+            } else {
+                loadAndPlayAudio();
+            }
+            
+            // Also try standard audio element
+            var audio = document.getElementById('background-music');
+            if (audio) {
+                audio.muted = false;
+                audio.play().catch(function(e) {});
+            }
+            
+            // Remove event listener after first click
+            document.removeEventListener('click', initAudio);
+        }, { once: true });
+    </script>
     
     <script src="script.js"></script>
 </body>
