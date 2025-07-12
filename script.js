@@ -3,6 +3,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const weddingCard = document.querySelector('.wedding-card');
     let windowWidth = window.innerWidth;
     
+    // Try to play music on user interaction
+    function playMusic() {
+        // Get the iframe
+        const iframe = document.querySelector('.youtube-player iframe');
+        
+        // Reload the iframe to trigger autoplay
+        if (iframe) {
+            const src = iframe.src;
+            iframe.src = src;
+        }
+        
+        // Remove the event listeners after first interaction
+        document.removeEventListener('click', playMusic);
+        document.removeEventListener('touchstart', playMusic);
+    }
+    
+    // Add event listeners for user interaction
+    document.addEventListener('click', playMusic);
+    document.addEventListener('touchstart', playMusic);
+    
     // Typing animation for text
     function typeWriterEffect() {
         const messageParagraphs = document.querySelectorAll('.message p');
@@ -67,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Random size (now with possibility of larger hearts)
         const isLarge = Math.random() < 0.15; // Reduced from 20% to 15% chance of large heart
         const isSpecial = Math.random() < 0.3; // 30% chance of special effect
-        const isRainbow = Math.random() < 0.1; // 10% chance of rainbow heart
+        // Removed rainbow effect
         
         if (isLarge) {
             heart.classList.add('large');
@@ -96,10 +116,11 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             document.head.appendChild(style);
             
-            // Add special effects to large hearts
-            if (isRainbow) {
-                heart.classList.add('rainbow');
-            } else if (isSpecial) {
+            // Only red color for all hearts
+            heart.style.backgroundColor = '#ff0000';
+            
+            // Add special effects to large hearts (only spin or glow, no rainbow)
+            if (isSpecial) {
                 if (Math.random() < 0.5) {
                     heart.classList.add('glow');
                 } else {
@@ -108,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             // Normal size hearts - reduced size range
-            const size = Math.floor(Math.random() * 10) + 10; // 10px to 20px (reduced from 15-30px)
+            const size = Math.floor(Math.random() * 8) + 8; // 8px to 16px (reduced further)
             heart.style.width = size + 'px';
             heart.style.height = size + 'px';
             
@@ -131,10 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             document.head.appendChild(style);
             
-            // Add special effects to some normal hearts
-            if (isRainbow) {
-                heart.classList.add('rainbow');
-            } else if (isSpecial) {
+            // Only red color for all hearts
+            heart.style.backgroundColor = '#ff0000';
+            
+            // Add special effects to some normal hearts (only spin or glow, no rainbow)
+            if (isSpecial) {
                 if (Math.random() < 0.5) {
                     heart.classList.add('glow');
                 } else {
@@ -149,42 +171,22 @@ document.addEventListener('DOMContentLoaded', function() {
             `2s, ${animationDuration}s, 8s` : 
             (heart.classList.contains('glow') ? 
                 `2s, ${animationDuration}s, 4s` : 
-                (heart.classList.contains('rainbow') ? 
-                    `2s, ${animationDuration}s, 4s` : 
-                    `2s, ${animationDuration}s`));
+                `2s, ${animationDuration}s`);
         
         // Random opacity
         const opacity = Math.random() * 0.5 + 0.5; // 0.5 to 1
         heart.style.opacity = opacity;
-        
-        // Random color variations - more vibrant
-        const hue = Math.floor(Math.random() * 40) - 20; // -20 to 20
-        const saturation = Math.floor(Math.random() * 20) + 80; // 80% to 100%
-        const lightness = Math.floor(Math.random() * 15) + 60; // 60% to 75%
-        const color = `hsl(${350 + hue}, ${saturation}%, ${lightness}%)`;
-        
-        if (!heart.classList.contains('rainbow')) {
-            heart.style.backgroundColor = color;
-        }
         
         // Add the same color to pseudo-elements
         if (!heart.classList.contains('large')) {
             const style = document.getElementById(heart.id + '-style') || document.createElement('style');
             style.id = heart.id + '-style';
             
-            if (!heart.classList.contains('rainbow')) {
-                style.textContent += `
-                    #${heart.id}:before, #${heart.id}:after {
-                        background-color: ${color};
-                    }
-                `;
-            } else {
-                style.textContent += `
-                    #${heart.id}:before, #${heart.id}:after {
-                        animation: rainbowHeart 4s linear infinite;
-                    }
-                `;
-            }
+            style.textContent += `
+                #${heart.id}:before, #${heart.id}:after {
+                    background-color: #ff0000;
+                }
+            `;
             document.head.appendChild(style);
         }
         
@@ -246,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             burstHeart.classList.add('heart');
             
             // Random size for burst hearts - smaller now
-            const size = Math.floor(Math.random() * 8) + 10; // 10px to 18px (reduced from 15-25px)
+            const size = Math.floor(Math.random() * 6) + 8; // 8px to 14px (reduced further)
             burstHeart.style.width = size + 'px';
             burstHeart.style.height = size + 'px';
             
@@ -259,14 +261,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const angle = (i / burstCount) * 360;
             const distance = Math.random() * 50 + 30; // 30px to 80px (reduced from 40-100px)
             
-            // Random vibrant color or rainbow
-            if (Math.random() < 0.2) { // 20% chance of rainbow heart
-                burstHeart.classList.add('rainbow');
-            } else {
-                const hue = Math.floor(Math.random() * 40) - 20; // -20 to 20
-                const color = `hsl(${350 + hue}, 100%, 65%)`;
-                burstHeart.style.backgroundColor = color;
-            }
+            // Only red color for all burst hearts
+            burstHeart.style.backgroundColor = '#ff0000';
             
             // Set unique ID for the burst heart
             const burstHeartId = 'burst-heart-' + Date.now() + i;
@@ -275,23 +271,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create style for pseudo-elements
             const burstStyle = document.createElement('style');
             
-            if (!burstHeart.classList.contains('rainbow')) {
-                burstStyle.textContent = `
-                    #${burstHeartId}:before, #${burstHeartId}:after {
-                        background-color: ${burstHeart.style.backgroundColor};
-                        width: ${size}px;
-                        height: ${size}px;
-                    }
-                `;
-            } else {
-                burstStyle.textContent = `
-                    #${burstHeartId}:before, #${burstHeartId}:after {
-                        animation: rainbowHeart 4s linear infinite;
-                        width: ${size}px;
-                        height: ${size}px;
-                    }
-                `;
-            }
+            burstStyle.textContent = `
+                #${burstHeartId}:before, #${burstHeartId}:after {
+                    background-color: #ff0000;
+                    width: ${size}px;
+                    height: ${size}px;
+                }
+            `;
             
             burstStyle.textContent += `
                 #${burstHeartId}:before {
