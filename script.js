@@ -65,12 +65,36 @@ document.addEventListener('DOMContentLoaded', function() {
         heart.style.left = positionX + 'px';
         
         // Random size (now with possibility of larger hearts)
-        const isLarge = Math.random() < 0.2; // 20% chance of large heart
+        const isLarge = Math.random() < 0.15; // Reduced from 20% to 15% chance of large heart
         const isSpecial = Math.random() < 0.3; // 30% chance of special effect
         const isRainbow = Math.random() < 0.1; // 10% chance of rainbow heart
         
         if (isLarge) {
             heart.classList.add('large');
+            
+            // Make large hearts smaller (40px instead of 50px)
+            const largeSize = 40;
+            heart.style.width = largeSize + 'px';
+            heart.style.height = largeSize + 'px';
+            
+            // Set the same size for pseudo-elements
+            const style = document.createElement('style');
+            const heartId = 'heart-large-' + Date.now() + Math.floor(Math.random() * 1000);
+            heart.id = heartId;
+            
+            style.textContent = `
+                #${heartId}:before, #${heartId}:after {
+                    width: ${largeSize}px;
+                    height: ${largeSize}px;
+                }
+                #${heartId}:before {
+                    top: -${largeSize/2}px;
+                }
+                #${heartId}:after {
+                    left: ${largeSize/2}px;
+                }
+            `;
+            document.head.appendChild(style);
             
             // Add special effects to large hearts
             if (isRainbow) {
@@ -83,8 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         } else {
-            // Normal size hearts
-            const size = Math.floor(Math.random() * 15) + 15; // 15px to 30px
+            // Normal size hearts - reduced size range
+            const size = Math.floor(Math.random() * 10) + 10; // 10px to 20px (reduced from 15-30px)
             heart.style.width = size + 'px';
             heart.style.height = size + 'px';
             
@@ -221,8 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const burstHeart = document.createElement('div');
             burstHeart.classList.add('heart');
             
-            // Random size for burst hearts
-            const size = Math.floor(Math.random() * 10) + 15; // 15px to 25px
+            // Random size for burst hearts - smaller now
+            const size = Math.floor(Math.random() * 8) + 10; // 10px to 18px (reduced from 15-25px)
             burstHeart.style.width = size + 'px';
             burstHeart.style.height = size + 'px';
             
@@ -233,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Random angle for burst direction
             const angle = (i / burstCount) * 360;
-            const distance = Math.random() * 60 + 40; // 40px to 100px
+            const distance = Math.random() * 50 + 30; // 30px to 80px (reduced from 40-100px)
             
             // Random vibrant color or rainbow
             if (Math.random() < 0.2) { // 20% chance of rainbow heart
@@ -324,14 +348,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Create initial hearts - reduced number
-    for (let i = 0; i < 6; i++) { // Reduced from 10 to 6
+    for (let i = 0; i < 4; i++) { // Reduced from 6 to 4
         setTimeout(() => {
             createHearts();
-        }, i * 800); // Increased delay between hearts
+        }, i * 1000); // Increased delay between hearts from 800ms to 1000ms
     }
     
     // Create new hearts periodically - reduced frequency
-    setInterval(createHearts, 3000); // Increased from 2000ms to 3000ms
+    setInterval(createHearts, 4000); // Increased from 3000ms to 4000ms
     
     // Start the typing effect
     typeWriterEffect();
